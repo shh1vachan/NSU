@@ -6,6 +6,7 @@
 #define NODE struct NODE
 #define VISITED struct VisitedNODE
 
+
 NODE
 {
     int vertex;
@@ -13,11 +14,13 @@ NODE
     NODE* next;
 };
 
+
 GRAPH
 {
     int vert_num;
     NODE** adjlist;
 };
+
 
 VISITED
 {
@@ -25,6 +28,7 @@ VISITED
     int processed;
     int parent;
 };
+
 
 GRAPH* create_graph(int vert)
 {
@@ -36,15 +40,28 @@ GRAPH* create_graph(int vert)
     return graph;
 }
 
+
+NODE* create_node(int vertex, long long weight)
+{
+    NODE* newNode = (NODE*)malloc(sizeof(NODE));
+    newNode->vertex = vertex;
+    newNode->weight = weight;
+    newNode->next = NULL;
+    return newNode;
+}
+
+
 void add_edge(GRAPH* graph, int start, int end, long long weight)
 {
+    NODE* newNode = create_node(end, weight);
+    newNode->next = graph->adjlist[start - 1];
+    graph->adjlist[start - 1] = newNode;
 
-    NODE* newNODE = (NODE*)malloc(sizeof(NODE));
-    newNODE->vertex = end;
-    newNODE->weight = weight;
-    newNODE->next = graph->adjlist[start - 1];
-    graph->adjlist[start - 1] = newNODE;
+    newNode = create_node(start, weight);
+    newNode->next = graph->adjlist[end - 1];
+    graph->adjlist[end - 1] = newNode;
 }
+
 
 int extract_min(NODE* priority_queue, VISITED* VisitedNodes)
 {
@@ -69,9 +86,10 @@ int extract_min(NODE* priority_queue, VISITED* VisitedNodes)
     return min_vertex;
 }
 
+
 void dijkstra(GRAPH* graph, int start_vert, int end_vert)
 {
-    VISITED* VisitedNodes = (VISITED*)malloc(graph->vert_num * sizeof(VISITED));
+    VISITED* VisitedNodes = (VISITED*)malloc(graph->vert_num *sizeof(VISITED));
     for (int i = 0; i < graph->vert_num; i++)
     {
         VisitedNodes[i].distance = LLONG_MAX;
@@ -82,36 +100,38 @@ void dijkstra(GRAPH* graph, int start_vert, int end_vert)
     VisitedNodes[start_vert - 1].distance = 0;
     NODE* priority_queue = NULL;
 
-    NODE* newNODE = (NODE*)malloc(sizeof(NODE));
-    newNODE->vertex = start_vert - 1;
-    newNODE->weight = 0;
-    newNODE->next = NULL;
-    priority_queue = newNODE;
+    NODE* newNode = (NODE*)malloc(sizeof(NODE));
+    newNode->vertex = start_vert - 1;
+    newNode->weight = 0;
+    newNode->next = NULL;
+    priority_queue = newNode;
 
     while (priority_queue)
     {
-        int u = extract_min(priority_queue, VisitedNodes);
-        if (u == -1)
+        int min_edge = extract_min(priority_queue, VisitedNodes);
+        if (min_edge == -1)
             break;
 
-        VisitedNodes[u].processed = 1;
 
-        NODE* temp = graph->adjlist[u];
+        VisitedNodes[min_edge].processed = 1;
+
+        NODE* temp = graph->adjlist[min_edge];
 
         while (temp)
         {
-            int v = temp->vertex - 1;
-            long long alt = VisitedNodes[u].distance + temp->weight;
-            if (alt <= VisitedNodes[v].distance)
-            {
-                VisitedNodes[v].distance = alt;
-                VisitedNodes[v].parent = u;
+            int adj_vertex = temp->vertex - 1;
+            long long alt = VisitedNodes[min_edge].distance + temp->weight;
 
-                NODE* newNODE = (NODE*)malloc(sizeof(NODE));
-                newNODE->vertex = v;
-                newNODE->weight = alt;
-                newNODE->next = priority_queue;
-                priority_queue = newNODE;
+            if (alt <= VisitedNodes[adj_vertex].distance)
+            {
+                VisitedNodes[adj_vertex].distance = alt;
+                VisitedNodes[adj_vertex].parent = min_edge;
+
+                NODE* newNode = (NODE*)malloc(sizeof(NODE));
+                newNode->vertex = adj_vertex;
+                newNode->weight = alt;
+                newNode->next = priority_queue;
+                priority_queue = newNode;
             }
             temp = temp->next;
         }
@@ -139,23 +159,24 @@ void dijkstra(GRAPH* graph, int start_vert, int end_vert)
     }
     printf("\n");
 
-    int tmp = 0;
-    int tmp2 = 0;
+    int checker1 = 0;
+    int checker2 = 0;
+
     for (int i = 0; i < path_len; i++)
     {
         if (path[i] == start_vert || path[i] == end_vert)
-            tmp++;
+            checker1++;
         if (VisitedNodes[i + 1].distance >= INT_MAX &&
         VisitedNodes[i + 1].distance != LLONG_MAX)
-            tmp2++;
+            checker2++;
     }
 
-    if (tmp != 2 && start_vert != end_vert)
+    if (checker1 != 2 && start_vert != end_vert)
     {
         puts("no path");
         exit(0);
     }
-    else if (VisitedNodes[path_len - 1].distance > INT_MAX && tmp2 > 2)
+    else if (VisitedNodes[path_len - 1].distance > INT_MAX && checker2 > 2)
     {
         printf("overflow");
         exit(0);
@@ -187,6 +208,7 @@ void input_check(int vert_num, int start, int end, int edge_num)
     }
 }
 
+
 int main()
 {
     int vert_num, start, end, edge_num;
@@ -215,10 +237,7 @@ int main()
             exit(0);
         }
 
-        if (edge_end < edge_start)
-            add_edge(graph, edge_end, edge_start, edge_len);
-        else
-            add_edge(graph, edge_start, edge_end, edge_len);
+        add_edge(graph, edge_start, edge_end, edge_len);
         strcnt++;
     }
 
