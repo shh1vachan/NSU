@@ -4,9 +4,10 @@
 
 #define GRAPH struct graph
 #define NODE struct NODE
-#define VISITED struct VisitedNODE
+#define VISITED struct VisitedNode
 
 
+//structure of node
 NODE
 {
     int vertex;
@@ -15,6 +16,7 @@ NODE
 };
 
 
+//structure of graph with adjacency list
 GRAPH
 {
     int vert_num;
@@ -22,6 +24,7 @@ GRAPH
 };
 
 
+//info about visited vertexes
 VISITED
 {
     long long distance;
@@ -30,6 +33,7 @@ VISITED
 };
 
 
+//create a graph
 GRAPH* create_graph(int vert)
 {
     GRAPH* graph = (GRAPH*)malloc(sizeof(GRAPH));
@@ -41,6 +45,7 @@ GRAPH* create_graph(int vert)
 }
 
 
+//create vertex of a graph
 NODE* create_node(int vertex, long long weight)
 {
     NODE* newNode = (NODE*)malloc(sizeof(NODE));
@@ -51,6 +56,7 @@ NODE* create_node(int vertex, long long weight)
 }
 
 
+//add edge between two vertexes
 void add_edge(GRAPH* graph, int start, int end, long long weight)
 {
     NODE* newNode = create_node(end, weight);
@@ -63,6 +69,7 @@ void add_edge(GRAPH* graph, int start, int end, long long weight)
 }
 
 
+//find minimal edge in adjacency list
 int extract_min(NODE* priority_queue, VISITED* VisitedNodes)
 {
     if (!priority_queue)
@@ -87,6 +94,7 @@ int extract_min(NODE* priority_queue, VISITED* VisitedNodes)
 }
 
 
+//Dijkstra's algorithm
 void dijkstra(GRAPH* graph, int start_vert, int end_vert)
 {
     VISITED* VisitedNodes = (VISITED*)malloc(graph->vert_num *sizeof(VISITED));
@@ -100,10 +108,7 @@ void dijkstra(GRAPH* graph, int start_vert, int end_vert)
     VisitedNodes[start_vert - 1].distance = 0;
     NODE* priority_queue = NULL;
 
-    NODE* newNode = (NODE*)malloc(sizeof(NODE));
-    newNode->vertex = start_vert - 1;
-    newNode->weight = 0;
-    newNode->next = NULL;
+    NODE* newNode = create_node(start_vert - 1, 0);
     priority_queue = newNode;
 
     while (priority_queue)
@@ -111,32 +116,29 @@ void dijkstra(GRAPH* graph, int start_vert, int end_vert)
         int min_edge = extract_min(priority_queue, VisitedNodes);
         if (min_edge == -1)
             break;
-
-
+        
         VisitedNodes[min_edge].processed = 1;
+        NODE* node_adj = graph->adjlist[min_edge];
 
-        NODE* temp = graph->adjlist[min_edge];
-
-        while (temp)
+        while (node_adj)
         {
-            int adj_vertex = temp->vertex - 1;
-            long long alt = VisitedNodes[min_edge].distance + temp->weight;
+            int adj_vertex = node_adj->vertex - 1;
+            long long alt = VisitedNodes[min_edge].distance + node_adj->weight;
 
             if (alt <= VisitedNodes[adj_vertex].distance)
             {
                 VisitedNodes[adj_vertex].distance = alt;
                 VisitedNodes[adj_vertex].parent = min_edge;
 
-                NODE* newNode = (NODE*)malloc(sizeof(NODE));
-                newNode->vertex = adj_vertex;
-                newNode->weight = alt;
+                NODE* newNode = create_node(adj_vertex, alt);
                 newNode->next = priority_queue;
                 priority_queue = newNode;
             }
-            temp = temp->next;
+            node_adj = node_adj->next;
         }
     }
 
+//print a result    
     int path[graph->vert_num];
     int path_len = 0;
 
@@ -189,6 +191,7 @@ void dijkstra(GRAPH* graph, int start_vert, int end_vert)
 }
 
 
+//check for errors in input 
 void input_check(int vert_num, int start, int end, int edge_num)
 {
     if (vert_num < 0 || vert_num > 5000)
