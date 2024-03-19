@@ -1,0 +1,3 @@
+D:/всякое/Kruskal/cmake-build-debug/CMakeFiles/Kruskal.dir
+D:/всякое/Kruskal/cmake-build-debug/CMakeFiles/edit_cache.dir
+D:/всякое/Kruskal/cmake-build-debug/CMakeFiles/rebuild_cache.dir
