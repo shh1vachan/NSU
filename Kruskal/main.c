@@ -5,6 +5,7 @@
 #define EDGE struct EDGE
 
 
+//structure of edge
 EDGE
 {
     int start;
@@ -13,12 +14,14 @@ EDGE
 };
 
 
+//compare two values for qsort function
 int compare(const void* a, const void* b)
 {
     return ((EDGE *) a)->weight - ((EDGE *) b)->weight;
 }
 
 
+//find first father of vertex
 int find_parent(int vertex, int parent[])
 {
     if (parent[vertex] == -1)
@@ -27,6 +30,7 @@ int find_parent(int vertex, int parent[])
 }
 
 
+//Kruskal"s algorithm
 void kruskal(EDGE* graph_edges, int edge_num, int vertex_num)
 {
     int* parent = (int*)malloc(vertex_num * sizeof(int));
@@ -53,6 +57,7 @@ void kruskal(EDGE* graph_edges, int edge_num, int vertex_num)
         }
     }
 
+//print a result    
     if (spanning_edges < vertex_num - 1)
     {
         puts("no spanning tree");
@@ -67,6 +72,7 @@ void kruskal(EDGE* graph_edges, int edge_num, int vertex_num)
 }
 
 
+//check for errors in input
 int error_check(int vertex_num, int edge_num)
 {
     if (vertex_num < 0 || vertex_num > 5000)
