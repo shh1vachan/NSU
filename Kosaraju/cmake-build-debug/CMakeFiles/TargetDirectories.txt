@@ -1,0 +1,3 @@
+D:/всякое/Kosaraju/cmake-build-debug/CMakeFiles/Kosaraju.dir
+D:/всякое/Kosaraju/cmake-build-debug/CMakeFiles/edit_cache.dir
+D:/всякое/Kosaraju/cmake-build-debug/CMakeFiles/rebuild_cache.dir
