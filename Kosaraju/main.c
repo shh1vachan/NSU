@@ -89,8 +89,7 @@ void kosaraju(int* adj_matrix, int* rev_adj_matrix, int vertex_num)
             rev_dfs(rev_adj_matrix, vertex_num, visited, vertex, result);
 
             if (result->next->next == NULL)
-                while(result->next != NULL)
-                    pop(result);
+                pop(result);
             else
             {
                 while (result->next != NULL)
