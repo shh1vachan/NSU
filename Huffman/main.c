@@ -7,11 +7,19 @@
 #define NODE struct node
 #define MINHEAP struct MinHeap
 
+
 NODE
 {
 	unsigned char data;
 	unsigned freq;
 	NODE* left, * right;
+};
+
+
+MINHEAP
+{
+    unsigned long long  size;
+    NODE** array;
 };
 
 
@@ -49,6 +57,7 @@ void saveTree(NODE* node, FILE* file)
 	fputc('1', file);
 	fputc(node->data, file);
 	fwrite(&node->freq, sizeof(unsigned), 1, file);
+
 	saveTree(node->left, file);
 	saveTree(node->right, file);
 }
@@ -57,31 +66,23 @@ void saveTree(NODE* node, FILE* file)
 NODE* loadTree(FILE* file)
 {
 	int isNode = fgetc(file);
-	if (isNode == '0') {
+	if (isNode == '0')
 		return NULL;
-	}
+
 	NODE* node = newNode(fgetc(file), 0);
 	fread(&node->freq, sizeof(unsigned), 1, file);
+
 	node->left = loadTree(file);
 	node->right = loadTree(file);
 	return node;
 }
 
 
-MINHEAP
-{
-	unsigned long long  size;
-	unsigned long long  capacity;
-	NODE** array;
-};
-
-
 MINHEAP* createMinHeap(unsigned capacity)
 {
 	MINHEAP* minHeap = (MINHEAP*)malloc(sizeof(MINHEAP));
 	minHeap->size = 0;
-	minHeap->capacity = capacity;
-	minHeap->array = (NODE**)malloc(minHeap->capacity * sizeof(NODE*));
+	minHeap->array = (NODE**)malloc(capacity * sizeof(NODE*));
 	return minHeap;
 }
 
@@ -117,7 +118,7 @@ NODE* extractMin(MINHEAP* minHeap)
 {
 	NODE* temp = minHeap->array[0];
 	minHeap->array[0] = minHeap->array[minHeap->size - 1];
-	--minHeap->size;
+	minHeap->size--;
 	minHeapify(minHeap, 0);
 	return temp;
 }
@@ -125,10 +126,11 @@ NODE* extractMin(MINHEAP* minHeap)
 
 void insertMinHeap(MINHEAP* minHeap, NODE* minHeapNode)
 {
-	++minHeap->size;
+	minHeap->size++;
 	int i = (int)minHeap->size - 1;
 
-	while (i && minHeapNode->freq < minHeap->array[(i - 1) / 2]->freq) {
+	while (i && minHeapNode->freq < minHeap->array[(i - 1) / 2]->freq)
+    {
 		minHeap->array[i] = minHeap->array[(i - 1) / 2];
 		i = (i - 1) / 2;
 	}
@@ -141,7 +143,7 @@ void buildMinHeap(MINHEAP* minHeap)
 	int n = (int)minHeap->size - 1;
 	int i;
 
-	for (i = (n - 1) / 2; i >= 0; --i)
+	for (i = (n - 1) / 2; i >= 0; i--)
 		minHeapify(minHeap, i);
 }
 
@@ -168,11 +170,12 @@ MINHEAP* InitMinHeap(unsigned char data[], int freq[], int size)
 
 NODE* buildHuffmanTree(unsigned char data[], int freq[], int size)
 {
-	NODE* left, * right, * top;
+	NODE *left, *right, *top;
 
 	MINHEAP* minHeap = InitMinHeap(data, freq, size);
 
-	while (!isSizeOne(minHeap)) {
+	while (!isSizeOne(minHeap))
+    {
 		left = extractMin(minHeap);
 		right = extractMin(minHeap);
 
@@ -278,21 +281,21 @@ void add(unsigned int* source, int* pointer, unsigned int value, int len)
 unsigned long long  freadtotalsize(char* resfn)
 {
 	FILE* fresfn = fopen(resfn, "rb");
-	if (fseek(fresfn, -8, SEEK_END) != 0)
-    {
-		perror("Ошибка при перемещении указателя файла");
-		fclose(fresfn);
-		return 0;
-	}
-	unsigned long long last_value;
-
-	if (fread(&last_value, sizeof(last_value), 1, fresfn) != 1)
-    {
-		perror("Ошибка при чтении данных из файла");
-		fclose(fresfn);
-		return 0;
-	}
+    fseek(fresfn, -8, SEEK_END);
+    unsigned long long last_value;
+    fread(&last_value, sizeof(last_value), 1, fresfn);
 	return last_value;
+}
+
+
+void DestroyTree(NODE *root)
+{
+    if (root == NULL)
+        return;
+
+    DestroyTree(root->left);
+    DestroyTree(root->right);
+    free(root);
 }
 
 
@@ -347,6 +350,7 @@ void decode(char* fn, char* resfn)
     }
     fclose(ffn);
     fclose(fresfn);
+    DestroyTree(root);
 }
 
 
@@ -355,17 +359,21 @@ void encode(NODE* root, char* fn, char* resfn) {
     FILE* ffn = fopen(fn, "rb");
     FILE* fresfn = fopen(resfn, "wb");
     saveTree(root, fresfn);
-    if (ffn == NULL) {
+
+    if (ffn == NULL)
+    {
         printf("Ошибка открытия файла\n");
         return;
     }
+
     unsigned char c;
     unsigned int res = 0;
     int pointer = 0;
     int huffCode[100];
     int top = 0;
 
-    while (true) {
+    while (true)
+    {
         c = fgetc(ffn);
         if (feof(ffn))
             break;
@@ -375,7 +383,8 @@ void encode(NODE* root, char* fn, char* resfn) {
         bool ex = false;
         getBCode(root, huffCode, top, &ex, &resgetBCode, &resLen, c);
         add(&res, &pointer, resgetBCode, resLen);
-        if (pointer >= 16) {
+        if (pointer >= 16)
+        {
             unsigned short cc = (unsigned short)(res >> 16);
             fwrite(&cc, 2, 1, fresfn);
             TotalSize += 16;
@@ -390,7 +399,9 @@ void encode(NODE* root, char* fn, char* resfn) {
     fwrite(&TotalSize, sizeof(TotalSize), 1, fresfn);
     fclose(ffn);
     fclose(fresfn);
+    DestroyTree(root);
 }
+
 
 
 int main(int argc, char* argv[])
@@ -413,7 +424,7 @@ int main(int argc, char* argv[])
 
         for (int i = 0; i < 256; i++)
         {
-            if (freq[i] != 0) 
+            if (freq[i] != 0)
             {
                 alp1[ii] = alp[i];
                 freq1[ii++] = freq[i];
