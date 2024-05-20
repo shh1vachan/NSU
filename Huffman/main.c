@@ -354,7 +354,8 @@ void decode(char* fn, char* resfn)
 }
 
 
-void encode(NODE* root, char* fn, char* resfn) {
+void encode(NODE* root, char* fn, char* resfn) 
+{
     unsigned long long TotalSize = 0;
     FILE* ffn = fopen(fn, "rb");
     FILE* fresfn = fopen(resfn, "wb");
@@ -403,21 +404,20 @@ void encode(NODE* root, char* fn, char* resfn) {
 }
 
 
-
 int main(int argc, char* argv[])
 {
     unsigned char alp[256];
     int freq[256];
 
     char* command = argv[1];
-    char* i1 = argv[2];
-    char* p2 = argv[3];
+    char* inputfile = argv[2];
+    char* outputfile = argv[3];
 
     if (strcmp(command, "c") == 0)
     {
         char* locale = setlocale(LC_ALL, "");
 
-        LoadFile(i1, alp, freq);
+        LoadFile(inputfile, alp, freq);
         unsigned char alp1[256];
         int freq1[256];
         int ii = 0;
@@ -431,12 +431,12 @@ int main(int argc, char* argv[])
             }
         }
         NODE* root = buildHuffmanTree(alp1, freq1, ii);
-        encode(root, i1, p2);
+        encode(root, inputfile, outputfile);
     }
     else if (strcmp(command, "d") == 0)
     {
         NODE* root = NULL;
-        decode(p2, i1);
+        decode(outputfile, inputfile);
     }
     return 0;
 }
